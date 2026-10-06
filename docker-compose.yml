@@ -1,0 +1,74 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: agentforge
+      POSTGRES_PASSWORD: agentforge_password
+      POSTGRES_DB: agentforge
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U agentforge"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+
+  api:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.api
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://agentforge:agentforge_password@postgres:5432/agentforge
+      AGENTFORGE_PROVIDER: mock
+      AGENTFORGE_RUNTIME: local
+      AGENTFORGE_SEED_DEMO: "1"
+      AGENTFORGE_INLINE_WORKER: "0"
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  worker:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.worker
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://agentforge:agentforge_password@postgres:5432/agentforge
+      AGENTFORGE_PROVIDER: mock
+      AGENTFORGE_RUNTIME: local
+      AGENTFORGE_WORKER_NAME: docker-worker-01
+      AGENTFORGE_REGION: eu-central
+    depends_on:
+      postgres:
+        condition: service_healthy
+      api:
+        condition: service_started
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.dashboard
+    restart: unless-stopped
+    environment:
+      NEXT_PUBLIC_API_URL: http://api:8000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+
+volumes:
+  pgdata:

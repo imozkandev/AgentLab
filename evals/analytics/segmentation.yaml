@@ -1,0 +1,25 @@
+cases:
+  - name: sessions-drop-segmentation
+    skill: analyze-game-metrics
+    input:
+      task: "Why did sessions per user fall this week?"
+    expected:
+      tools: [compare_periods, get_player_segments]
+      must_include: [sessions comparison, evidence]
+
+  - name: level-completion-drop
+    skill: analyze-game-metrics
+    input:
+      task: "Check why level completion dropped after the update."
+    expected:
+      tools: [get_player_segments, compare_periods]
+      must_include: [level completion comparison, affected segment]
+
+  - name: d7-by-platform
+    skill: analyze-game-metrics
+    input:
+      task: "Segment the D7 retention decline by platform, country and version."
+    expected:
+      tools: [get_player_segments]
+      must_include: [affected segment]
+      max_tool_calls: 10

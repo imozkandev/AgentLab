@@ -1,0 +1,16 @@
+cases:
+  - name: feedback-themes
+    skill: analyze-player-feedback
+    input:
+      task: "What are players complaining about in recent reviews?"
+    expected:
+      tools: [get_player_feedback]
+      must_include: [feedback themes, representative quotes, difficulty]
+
+  - name: feedback-platform-split
+    skill: analyze-player-feedback
+    input:
+      task: "Compare Android and iOS player sentiment."
+    expected:
+      tools: [get_player_feedback]
+      must_include: [platform comparison, sentiment]

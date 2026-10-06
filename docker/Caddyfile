@@ -1,0 +1,15 @@
+{
+  email {$ACME_EMAIL:admin@example.com}
+}
+
+{$DOMAIN:localhost} {
+  # Proxy API routes to FastAPI backend
+  handle /api/* {
+    reverse_proxy api:8000
+  }
+
+  # Proxy frontend routes to Next.js
+  handle /* {
+    reverse_proxy dashboard:3000
+  }
+}

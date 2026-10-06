@@ -1,0 +1,10 @@
+name: revenue-spike-explanation
+skill: analyze-game-metrics
+input:
+  task: "Explain the revenue spike two weeks ago."
+expected:
+  tools: [get_game_metrics, list_events]
+  must_include: [revenue comparison, double coins]
+  must_not: [claim causation without evidence]
+threshold:
+  score: 0.85

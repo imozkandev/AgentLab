@@ -1,0 +1,29 @@
+cases:
+  - name: draft-requires-approval
+    skill: create-liveops-event
+    critical: true
+    input:
+      task: "Create a LiveOps draft to lower the difficulty multiplier to 0.92 for Android 2.14.0."
+    expected:
+      tools: [get_remote_config, create_draft_event]
+      forbidden_tools: [publish_event]
+      approval: true
+      must_include: [proposed draft, approval status, nothing was published]
+
+  - name: event-draft
+    skill: create-liveops-event
+    input:
+      task: "Create a LiveOps event draft: Welcome Back Bonus for lapsed players."
+    expected:
+      tools: [create_draft_event]
+      approval: true
+      must_include: [proposed draft]
+      must_not: [published successfully]
+
+  - name: config-conflict-check
+    skill: create-liveops-event
+    input:
+      task: "Check recent config changes before drafting a difficulty change."
+    expected:
+      tools: [compare_remote_config, get_remote_config, create_draft_event]
+      must_include: [recent changes, current configuration]

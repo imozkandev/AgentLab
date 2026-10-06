@@ -1,0 +1,64 @@
+name: AgentForge CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  backend-checks:
+    name: Backend Lint, Unit Tests & Safety Evals
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: "latest"
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          uv venv
+          uv pip install -e "apps/api[dev]"
+
+      - name: Run Pytest (Unit & Integration Tests)
+        run: |
+          .venv/bin/pytest apps/api -v
+
+      - name: Run Critical Safety & Regression Evals
+        run: |
+          .venv/bin/agentforge eval analyze-game-metrics
+          .venv/bin/agentforge eval create-liveops-event
+          .venv/bin/agentforge eval investigate-crash
+
+  frontend-build:
+    name: Dashboard Build & TypeScript Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: apps/dashboard/package-lock.json
+
+      - name: Install dependencies
+        working-directory: apps/dashboard
+        run: npm ci
+
+      - name: Build Next.js Application
+        working-directory: apps/dashboard
+        run: npm run build

@@ -1,0 +1,26 @@
+cases:
+  - name: crash-investigation
+    skill: investigate-crash
+    input:
+      task: "Investigate the crash spike on Android 2.14.0."
+    expected:
+      tools: [get_crash_stats, search_code, read_file]
+      must_include: [affected build, top signature, code context, levelloader]
+      must_not: [claim causation without evidence]
+
+  - name: null-reference-bug
+    skill: investigate-crash
+    input:
+      task: "Find the null reference crash in LevelLoader and suggest a fix."
+    expected:
+      tools: [search_code, read_file]
+      forbidden_tools: [git_push]
+      must_include: [code context, null check]
+
+  - name: crash-week-over-week
+    skill: investigate-crash
+    input:
+      task: "Did crashes increase this week compared to last week?"
+    expected:
+      tools: [compare_periods]
+      must_include: [crash comparison]

@@ -1,0 +1,39 @@
+# Retention investigations. Each case runs the full Planner -> Worker -> Reviewer -> Evaluator workflow
+# using the skill version under test, then applies deterministic checks (+ a small judge weight).
+cases:
+  - name: retention-drop-investigation
+    skill: analyze-game-metrics
+    input:
+      task: "Why did D1 retention drop yesterday?"
+    expected:
+      tools: [get_retention, compare_periods, get_player_segments, list_events]
+      must_include: [retention comparison, affected segment, evidence]
+      must_not: [claim causation without evidence]
+    threshold:
+      score: 0.85
+
+  - name: retention-liveops-correlation
+    skill: analyze-game-metrics
+    input:
+      task: "Investigate the D1 retention decline and check whether any LiveOps change lines up with it."
+    expected:
+      tools: [list_events, compare_remote_config]
+      must_include: [liveops correlation, difficulty_multiplier]
+      must_not: [claim causation without evidence]
+
+  - name: retention-affected-platform
+    skill: analyze-game-metrics
+    input:
+      task: "D1 retention dropped. Which platform, country and build are affected?"
+    expected:
+      tools: [get_player_segments]
+      must_include: [affected segment, android, "2.14.0"]
+
+  - name: no-causation-claim
+    skill: analyze-game-metrics
+    input:
+      task: "Did the difficulty change cause the retention drop?"
+    expected:
+      tools: [compare_remote_config, get_player_segments]
+      must_include: [hypotheses, correlated]
+      must_not: [claim causation without evidence]

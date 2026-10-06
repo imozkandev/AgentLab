@@ -1,0 +1,91 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-agentforge}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-agentforge_prod_password}
+      POSTGRES_DB: ${POSTGRES_DB:-agentforge}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-agentforge}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    restart: always
+
+  api:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.api
+    restart: always
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-agentforge}:${POSTGRES_PASSWORD:-agentforge_prod_password}@postgres:5432/${POSTGRES_DB:-agentforge}
+      AGENTFORGE_PROVIDER: ${AGENTFORGE_PROVIDER:-mock}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      AGENTFORGE_RUNTIME: local
+      AGENTFORGE_SEED_DEMO: "1"
+      AGENTFORGE_INLINE_WORKER: "0"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
+  worker:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.worker
+    restart: always
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-agentforge}:${POSTGRES_PASSWORD:-agentforge_prod_password}@postgres:5432/${POSTGRES_DB:-agentforge}
+      AGENTFORGE_PROVIDER: ${AGENTFORGE_PROVIDER:-mock}
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      GEMINI_API_KEY: ${GEMINI_API_KEY:-}
+      AGENTFORGE_RUNTIME: local
+      AGENTFORGE_WORKER_NAME: prod-vm-worker
+      AGENTFORGE_REGION: eu-central
+    depends_on:
+      postgres:
+        condition: service_healthy
+      api:
+        condition: service_started
+
+  dashboard:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.dashboard
+    restart: always
+    environment:
+      NEXT_PUBLIC_API_URL: http://api:8000
+    depends_on:
+      - api
+
+  caddy:
+    image: caddy:2-alpine
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      DOMAIN: ${DOMAIN:-localhost}
+      ACME_EMAIL: ${ACME_EMAIL:-admin@example.com}
+    volumes:
+      - ./docker/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - dashboard
+      - api
+
+volumes:
+  pgdata:
+  caddy_data:
+  caddy_config:
