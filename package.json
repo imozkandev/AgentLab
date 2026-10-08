@@ -1,0 +1,13 @@
+{
+  "name": "agentlab",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AgentForge — AI Agent Enablement & Orchestration Platform",
+  "scripts": {
+    "dev": "npm --prefix apps/dashboard run dev",
+    "dev:dashboard": "npm --prefix apps/dashboard run dev",
+    "build": "npm --prefix apps/dashboard run build",
+    "start": "npm --prefix apps/dashboard run start",
+    "lint": "npm --prefix apps/dashboard run lint"
+  }
+}
