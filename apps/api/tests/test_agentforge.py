@@ -98,7 +98,7 @@ def test_workflow_creates_complete_trace(session):
     types = [s.type for s in session.query(RunStep).filter_by(run_id=r.id).order_by(RunStep.seq)]
     assert types[0] == "run.started" and "plan.created" in types and "reviewer.approved" in types
     assert types[-1] == "run.completed" and "evaluation.completed" in types
-    assert r.skill_version == "1.1.0" and r.tool_call_count >= 5 and r.evaluation_score > 0.9
+    assert r.skill_version == "1.1.0" and r.tool_call_count >= 5 and r.evaluation_score is not None and r.evaluation_score > 0.9
     assert r.estimated_cost > 0 and r.latency_ms > 0
 
 
@@ -111,7 +111,7 @@ def test_reviewer_rejects_incomplete_skill_then_worker_revises(session):
 
 def test_report_never_claims_causation(session):
     r = _run(session, "Did the difficulty change cause the retention drop?")
-    assert "correlated" in r.result_text and "proven causation" in r.result_text
+    assert r.result_text is not None and "correlated" in r.result_text and "proven causation" in r.result_text
 
 
 def test_unsafe_request_is_refused_and_drafted(session):

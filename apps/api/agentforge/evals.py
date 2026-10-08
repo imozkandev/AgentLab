@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import re
 from pathlib import Path
+from typing import Any
 
 import yaml
 from sqlalchemy import delete
@@ -24,7 +25,7 @@ def generic_evaluation(run: Run, st, skill_requires: list[str]) -> dict:
     text = run.result_text or ""
     halluc = 1.0 if (CAUSAL_RE.search(text) and not re.search(r"correlat", text, re.I)) else 0.0
     errors = len([e for e in st.errors if e.get("type") == "tool_error"])
-    scores = {
+    scores: dict[str, Any] = {
         "correctness": round((0.5 * cov_first + 0.5 * cov_final) * (1 - halluc), 3),
         "task_completion": 0.0 if not text else (1.0 if run.status == "completed" else 0.3),
         "tool_usage": round(0.7 * cov_first + 0.3 * (1 - min(1, errors / max(st.tool_calls, 1))), 3),

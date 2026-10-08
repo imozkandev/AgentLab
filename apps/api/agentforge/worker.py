@@ -25,7 +25,8 @@ def heartbeat(hostname: str, active: int) -> None:
         w.region = os.getenv("AGENTFORGE_REGION", "local")
         w.runtimes = runtime.available_runtimes()
         w.active_jobs = active
-        w.cpu = psutil.cpu_percent(interval=None)
+        cpu_val = psutil.cpu_percent(interval=None)
+        w.cpu = float(cpu_val[0]) if isinstance(cpu_val, list) else float(cpu_val)
         w.memory = psutil.virtual_memory().percent
         w.agents = len(s.scalars(select(Agent.name)).all())
         w.mocked, w.heartbeat = 0, now()
@@ -40,14 +41,16 @@ def claim(hostname: str) -> str | None:
             return None
         res = s.execute(update(Run).where(Run.id == rid, Run.status == "queued").values(status="running", worker=hostname))
         s.commit()
-        return rid if res.rowcount == 1 else None
+        rowcount = getattr(res, "rowcount", 0)
+        return rid if rowcount == 1 else None
 
 
 def process(run_id: str) -> None:
     from .orchestrator import Orchestrator
     with SessionLocal() as s:
         run = s.get(Run, run_id)
-        Orchestrator(s).execute(run)
+        if run:
+            Orchestrator(s).execute(run)
 
 
 def run_loop(stop: threading.Event, hostname: str | None = None) -> None:

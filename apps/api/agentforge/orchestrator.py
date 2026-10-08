@@ -418,14 +418,14 @@ def synth_metrics(st: RunState, skill) -> list[tuple[str, str]]:
                          f"{label} {direction} from {fmt(m, p)} to {fmt(m, c)} ({fmt_delta(m, cmp_['delta'])}, "
                          f"{cmp_['pct_change']:+.1f}%) comparing {cmp_['current']['period'][0]}..{cmp_['current']['period'][1]} "
                          f"with the previous equal-length period."))
-    elif st.last("get_retention"):
-        r = st.last("get_retention")
+    r = st.last("get_retention")
+    if r:
         sections.append((f"{label} snapshot", f"D1 on {r['date']}: {fmt('d1', r['d1'])}, D7: {fmt('d7', r['d7'])} (single day, no baseline)."))
     anomaly = None
     series = (st.last("get_game_metrics") or {}).get("daily", [])
     if series:
         anomaly = anomaly_day(series, m)
-        if anomaly[0]:
+        if anomaly and anomaly[0] is not None and anomaly[1] is not None:
             sections.append(("Anomaly detection", f"First significant deviation of {label} on {anomaly[0]} "
                                                   f"({fmt_delta(m, anomaly[1])} vs the 30-day median)."))
     seg = st.last("get_player_segments")

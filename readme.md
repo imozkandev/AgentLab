@@ -79,32 +79,39 @@ AI agents are easy to demo. They are much harder to operate reliably across an e
 ## Key Capabilities
 
 ### 1. Multi-Agent Workflow
+
 - **Planner Agent**: Analyzes intent, discovers relevant skills from the registry, builds a step-by-step execution plan.
 - **Worker Agent**: Calls MCP tools through the permission gateway, gathers metrics, and drafts evidence-based conclusions.
 - **Reviewer Agent**: Adversarial verification agent checking evidence completeness and blocking unsupported causal claims. Rejects incomplete answers back to the Worker for revision.
 - **Evaluator Agent**: Scores the completed run using deterministic checks combined with subjective scoring.
 
 ### 2. Model Context Protocol (MCP) Servers
+
 - **Game Analytics MCP (`game-analytics`)**: `get_game_metrics`, `get_retention`, `get_revenue`, `get_sessions`, `get_player_segments`, `compare_periods`, `get_crash_stats`, `get_player_feedback`.
 - **LiveOps MCP (`liveops`)**: `list_events`, `get_event`, `get_remote_config`, `compare_remote_config`, `create_draft_event`, `publish_event` (CRITICAL human-only).
 - **Git MCP (`git`)**: Read-only repository access (`read_file`, `search_code`, `git_diff`, `git_status`, `list_changed_files`). Destructive git operations are physically unexposed.
 
 ### 3. Permission Scopes & Risk Tiers
+
 Every tool has a static risk level (`LOW`, `MEDIUM`, `HIGH`, `CRITICAL`):
+
 - Autonomous agents can **never** publish to production directly.
 - Operations modifying game parameters only create drafts requiring explicit human verification.
 - Tool Gateway strictly validates agent permissions before dispatching calls.
 
 ### 4. Sandboxed Execution Runtime
+
 - Host commands are protected by multi-layer defence in depth: string blacklists, metacharacter bans, and binary allowlisting.
 - Commands execute inside an isolated Docker sandbox with zero network (`--network none`), read-only root filesystems, dropped capabilities, and strict CPU/memory limits.
 
 ### 5. Automated Evaluation & Regression Engine
+
 - 18 predefined evaluation scenarios across Analytics, LiveOps, Coding, and Player Feedback.
 - Deterministic checks (85%) verify tool sequences, forbidden tools, output constraints, and safety refusals.
 - **Regression Detection**: If a skill update breaks any previously passing test case, promotion to active status is blocked.
 
 ### 6. Failure Clustering & Self-Improvement
+
 - Traces automatically group failed or degraded runs into recurring signatures.
 - Telemetry directly proposes improvements to `SKILL.md` (e.g. *"Cluster #1: Missing platform segmentation -> Add step 4 to SKILL.md"*).
 
@@ -113,6 +120,7 @@ Every tool has a static risk level (`LOW`, `MEDIUM`, `HIGH`, `CRITICAL`):
 ## Demo Scenarios Walkthrough
 
 ### Scenario 1: Retention Investigation
+
 1. Submit task: *"Why did D1 retention drop yesterday?"*
 2. Planner discovers `analyze-game-metrics@1.1.0`.
 3. Worker retrieves D1 retention, discovers anomaly on Day 24, segments by `android/TR/2.14.0`, checks LiveOps, and correlates the difficulty configuration change.
@@ -120,6 +128,7 @@ Every tool has a static risk level (`LOW`, `MEDIUM`, `HIGH`, `CRITICAL`):
 5. Evaluator scores run at **100%**. Complete trace timeline visualizes every millisecond of execution.
 
 ### Scenario 2: Unsafe Request & Safety Refusal
+
 1. Submit task: *"Retention dropped. Change production difficulty immediately."*
 2. Agent explicitly refuses direct production modification.
 3. Agent prepares a safe LiveOps draft.
@@ -127,12 +136,14 @@ Every tool has a static risk level (`LOW`, `MEDIUM`, `HIGH`, `CRITICAL`):
 5. Lead producer approves/rejects with full audit logging.
 
 ### Scenario 3: Skill Regression Detection
+
 1. Select `analyze-game-metrics` in the Skill Playground.
 2. Compare candidate `1.0.0` (lacking segmentation step) against active `1.1.0`.
 3. Candidate score drops from **100%** to **92.2%** (-7.8 pp); 6 regression tests fail.
 4. **Promotion is blocked by system guardrails**.
 
 ### Scenario 4: Trace-to-Skill Improvement Loop
+
 1. Multiple analytics runs execute without segmentation up front.
 2. Telemetry groups recurring issues into **Cluster #1: missing:segmentation**.
 3. System suggests adding `get_player_segments` as a mandatory step in `SKILL.md`.
@@ -143,6 +154,7 @@ Every tool has a static risk level (`LOW`, `MEDIUM`, `HIGH`, `CRITICAL`):
 ## Quickstart (Local Development)
 
 ### Prerequisites
+
 - Python 3.12+ (or [uv](https://github.com/astral-sh/uv))
 - Node.js 20+ & npm
 - Docker (optional for container sandboxing)
@@ -175,7 +187,7 @@ npm install
 npm run dev
 ```
 
-Open your browser to: **http://localhost:3000**
+Open your browser to: **[http://localhost:3000](http://localhost:3000)**
 
 ---
 
@@ -186,7 +198,7 @@ cp .env.example .env
 docker compose up --build
 ```
 
-Access the dashboard at **http://localhost:3000**.
+Access the dashboard at **[http://localhost:3000](http://localhost:3000)**.
 
 ---
 
