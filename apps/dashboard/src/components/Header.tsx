@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
+import { useLanguage } from '@/lib/LanguageContext';
 
 export type TabType = 
   | 'overview' 
@@ -38,6 +39,8 @@ interface HeaderProps {
 }
 
 export default function Header({ activeTab, setActiveTab, onOpenNewRunModal }: HeaderProps) {
+  const { language, setLanguage } = useLanguage();
+
   const { data: approvals } = useQuery({
     queryKey: ['approvals', 'pending'],
     queryFn: () => api.getApprovals('pending'),
@@ -47,17 +50,62 @@ export default function Header({ activeTab, setActiveTab, onOpenNewRunModal }: H
   const pendingCount = approvals?.length || 0;
 
   const navItems: { id: TabType; label: string; icon: React.ReactNode; badge?: number }[] = [
-    { id: 'overview', label: 'Overview', icon: <Activity className="w-4 h-4" /> },
-    { id: 'runs', label: 'Runs & Traces', icon: <Terminal className="w-4 h-4" /> },
-    { id: 'skills', label: 'Skills & Playground', icon: <Layers className="w-4 h-4" /> },
-    { id: 'evals', label: 'Evaluations', icon: <CheckCircle2 className="w-4 h-4" /> },
-    { id: 'mcp', label: 'MCP & Safety Lab', icon: <ShieldAlert className="w-4 h-4" /> },
-    { id: 'approvals', label: 'Approvals', icon: <AlertTriangle className="w-4 h-4" />, badge: pendingCount },
-    { id: 'failures', label: 'Failure Analysis', icon: <BarChart3 className="w-4 h-4" /> },
-    { id: 'infrastructure', label: 'Workers', icon: <Server className="w-4 h-4" /> },
-    { id: 'audit', label: 'Audit Log', icon: <FileText className="w-4 h-4" /> },
-    { id: 'costs', label: 'Cost & Routing', icon: <Cpu className="w-4 h-4" /> },
-    { id: 'guide', label: 'Rehber & Docs', icon: <BookOpen className="w-4 h-4 text-sky-400" /> },
+    { 
+      id: 'overview', 
+      label: language === 'tr' ? 'Genel Bakış' : 'Overview', 
+      icon: <Activity className="w-4 h-4" /> 
+    },
+    { 
+      id: 'runs', 
+      label: language === 'tr' ? 'Çalışmalar & İzler' : 'Runs & Traces', 
+      icon: <Terminal className="w-4 h-4" /> 
+    },
+    { 
+      id: 'skills', 
+      label: language === 'tr' ? 'Skill & Playground' : 'Skills & Playground', 
+      icon: <Layers className="w-4 h-4" /> 
+    },
+    { 
+      id: 'evals', 
+      label: language === 'tr' ? 'Değerlendirmeler' : 'Evaluations', 
+      icon: <CheckCircle2 className="w-4 h-4" /> 
+    },
+    { 
+      id: 'mcp', 
+      label: language === 'tr' ? 'MCP & Güvenlik' : 'MCP & Safety Lab', 
+      icon: <ShieldAlert className="w-4 h-4" /> 
+    },
+    { 
+      id: 'approvals', 
+      label: language === 'tr' ? 'Onaylar' : 'Approvals', 
+      icon: <AlertTriangle className="w-4 h-4" />, 
+      badge: pendingCount 
+    },
+    { 
+      id: 'failures', 
+      label: language === 'tr' ? 'Hata Analizi' : 'Failure Analysis', 
+      icon: <BarChart3 className="w-4 h-4" /> 
+    },
+    { 
+      id: 'infrastructure', 
+      label: language === 'tr' ? 'İşçiler (Workers)' : 'Workers', 
+      icon: <Server className="w-4 h-4" /> 
+    },
+    { 
+      id: 'audit', 
+      label: language === 'tr' ? 'Denetim Günlüğü' : 'Audit Log', 
+      icon: <FileText className="w-4 h-4" /> 
+    },
+    { 
+      id: 'costs', 
+      label: language === 'tr' ? 'Maliyet & Model' : 'Cost & Routing', 
+      icon: <Cpu className="w-4 h-4" /> 
+    },
+    { 
+      id: 'guide', 
+      label: language === 'tr' ? 'Rehber & Docs' : 'Guide & Docs', 
+      icon: <BookOpen className="w-4 h-4 text-sky-400" /> 
+    },
   ];
 
   return (
@@ -77,9 +125,33 @@ export default function Header({ activeTab, setActiveTab, onOpenNewRunModal }: H
             </div>
           </div>
 
-          {/* Quick Action Button */}
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-mono bg-emerald-950/60 text-emerald-400 border border-emerald-800/60">
+          {/* Quick Action Button & Controls */}
+          <div className="flex items-center gap-2 sm:gap-3">
+            {/* Language Switcher */}
+            <div className="flex items-center bg-slate-900 border border-slate-800 rounded-md p-0.5 text-xs font-mono">
+              <button
+                type="button"
+                onClick={() => setLanguage('tr')}
+                className={`px-2 py-0.5 rounded text-[11px] font-semibold transition cursor-pointer ${
+                  language === 'tr' ? 'bg-sky-600 text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'
+                }`}
+                title="Türkçe"
+              >
+                TR
+              </button>
+              <button
+                type="button"
+                onClick={() => setLanguage('en')}
+                className={`px-2 py-0.5 rounded text-[11px] font-semibold transition cursor-pointer ${
+                  language === 'en' ? 'bg-sky-600 text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'
+                }`}
+                title="English"
+              >
+                EN
+              </button>
+            </div>
+
+            <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-mono bg-emerald-950/60 text-emerald-400 border border-emerald-800/60">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
               Runtime: Docker Sandbox
             </div>
@@ -90,7 +162,7 @@ export default function Header({ activeTab, setActiveTab, onOpenNewRunModal }: H
               className="inline-flex items-center gap-2 px-3 py-1.5 text-xs font-medium text-white bg-sky-600 hover:bg-sky-500 active:scale-[0.98] rounded-md transition shadow-sm shadow-sky-600/30 cursor-pointer"
             >
               <Play className="w-3.5 h-3.5 fill-current" />
-              Run Agent
+              {language === 'tr' ? 'Ajanı Çalıştır' : 'Run Agent'}
             </button>
           </div>
         </div>
