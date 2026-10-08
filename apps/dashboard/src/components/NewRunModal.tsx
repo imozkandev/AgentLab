@@ -9,6 +9,7 @@ interface NewRunModalProps {
   isOpen: boolean;
   onClose: () => void;
   onRunCreated?: (runId: string) => void;
+  initialTask?: string;
 }
 
 const PRESET_TASKS = [
@@ -44,12 +45,18 @@ const PRESET_TASKS = [
   }
 ];
 
-export default function NewRunModal({ isOpen, onClose, onRunCreated }: NewRunModalProps) {
+export default function NewRunModal({ isOpen, onClose, onRunCreated, initialTask }: NewRunModalProps) {
   const queryClient = useQueryClient();
-  const [task, setTask] = useState('');
+  const [task, setTask] = useState(initialTask || '');
   const [skill, setSkill] = useState('');
   const [skillVersion, setSkillVersion] = useState('');
   const [error, setError] = useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (initialTask) {
+      setTask(initialTask);
+    }
+  }, [initialTask, isOpen]);
 
   const createMutation = useMutation({
     mutationFn: (data: { task: string; skill?: string; skill_version?: string }) =>

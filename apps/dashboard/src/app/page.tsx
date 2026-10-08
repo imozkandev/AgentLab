@@ -13,11 +13,13 @@ import FailuresView from '@/components/FailuresView';
 import InfrastructureView from '@/components/InfrastructureView';
 import AuditView from '@/components/AuditView';
 import CostsView from '@/components/CostsView';
+import GuideView from '@/components/GuideView';
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<TabType>('overview');
   const [selectedRunId, setSelectedRunId] = useState<string | null>(null);
   const [isNewRunModalOpen, setIsNewRunModalOpen] = useState<boolean>(false);
+  const [modalInitialTask, setModalInitialTask] = useState<string | undefined>(undefined);
 
   const handleSelectRun = (id: string | null) => {
     setSelectedRunId(id);
@@ -31,13 +33,18 @@ export default function Home() {
     setSelectedRunId(runId);
   };
 
+  const handleOpenNewRun = (initialTask?: string) => {
+    setModalInitialTask(initialTask);
+    setIsNewRunModalOpen(true);
+  };
+
   return (
     <div className="min-h-screen bg-[#070b14] text-slate-100 flex flex-col font-sans">
       {/* Top Bar with Navigation */}
       <Header
         activeTab={activeTab}
         setActiveTab={setActiveTab}
-        onOpenNewRunModal={() => setIsNewRunModalOpen(true)}
+        onOpenNewRunModal={() => handleOpenNewRun()}
       />
 
       {/* Main Content Area */}
@@ -45,7 +52,7 @@ export default function Home() {
         {activeTab === 'overview' && (
           <OverviewView
             onSelectRun={handleSelectRun}
-            onOpenNewRun={() => setIsNewRunModalOpen(true)}
+            onOpenNewRun={() => handleOpenNewRun()}
             onNavigateTab={setActiveTab}
           />
         )}
@@ -54,7 +61,7 @@ export default function Home() {
           <RunsView
             selectedRunId={selectedRunId}
             onSelectRun={setSelectedRunId}
-            onOpenNewRun={() => setIsNewRunModalOpen(true)}
+            onOpenNewRun={() => handleOpenNewRun()}
           />
         )}
 
@@ -75,12 +82,23 @@ export default function Home() {
         {activeTab === 'audit' && <AuditView />}
 
         {activeTab === 'costs' && <CostsView />}
+
+        {activeTab === 'guide' && (
+          <GuideView
+            onNavigateTab={setActiveTab}
+            onOpenNewRun={handleOpenNewRun}
+          />
+        )}
       </main>
 
       {/* New Run Modal */}
       <NewRunModal
         isOpen={isNewRunModalOpen}
-        onClose={() => setIsNewRunModalOpen(false)}
+        initialTask={modalInitialTask}
+        onClose={() => {
+          setIsNewRunModalOpen(false);
+          setModalInitialTask(undefined);
+        }}
         onRunCreated={handleRunCreated}
       />
 

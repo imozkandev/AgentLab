@@ -12,7 +12,8 @@ import {
   BarChart3, 
   Play, 
   AlertTriangle,
-  Server
+  Server,
+  BookOpen
 } from 'lucide-react';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/api';
@@ -27,7 +28,8 @@ export type TabType =
   | 'failures' 
   | 'infrastructure' 
   | 'audit' 
-  | 'costs';
+  | 'costs'
+  | 'guide';
 
 interface HeaderProps {
   activeTab: TabType;
@@ -55,6 +57,7 @@ export default function Header({ activeTab, setActiveTab, onOpenNewRunModal }: H
     { id: 'infrastructure', label: 'Workers', icon: <Server className="w-4 h-4" /> },
     { id: 'audit', label: 'Audit Log', icon: <FileText className="w-4 h-4" /> },
     { id: 'costs', label: 'Cost & Routing', icon: <Cpu className="w-4 h-4" /> },
+    { id: 'guide', label: 'Rehber & Docs', icon: <BookOpen className="w-4 h-4 text-sky-400" /> },
   ];
 
   return (
