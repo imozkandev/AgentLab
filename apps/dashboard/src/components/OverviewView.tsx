@@ -14,7 +14,8 @@ import {
   TrendingUp, 
   ArrowRight,
   Sparkles,
-  RefreshCw
+  RefreshCw,
+  AlertCircle
 } from 'lucide-react';
 import { 
   ResponsiveContainer, 
@@ -32,10 +33,33 @@ interface OverviewViewProps {
 }
 
 export default function OverviewView({ onSelectRun, onOpenNewRun, onNavigateTab }: OverviewViewProps) {
-  const { data, isLoading, refetch, isRefetching } = useQuery({
+  const { data, isLoading, isError, error, refetch, isRefetching } = useQuery({
     queryKey: ['overview'],
     queryFn: () => api.getOverview(),
   });
+
+  if (isError) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[400px] text-center p-8 bg-slate-900/40 rounded-xl border border-rose-900/40 max-w-lg mx-auto">
+        <div className="w-10 h-10 rounded-full bg-rose-950/80 text-rose-400 flex items-center justify-center mb-3 border border-rose-800">
+          <AlertCircle className="w-5 h-5" />
+        </div>
+        <h3 className="text-base font-semibold text-white mb-1">Backend Bağlantısı Kurulamadı</h3>
+        <p className="text-xs text-slate-400 mb-4 max-w-sm">
+          Python FastAPI backend sunucusuna (`http://127.0.0.1:8000`) erişilemedi. Lütfen terminalde backend sunucusunun çalıştığından emin olun.
+        </p>
+        <div className="bg-[#070b14] p-3 rounded text-[11px] font-mono text-sky-400 border border-slate-800 mb-4 select-all text-left w-full">
+          uvicorn agentforge.main:app --reload --port 8000
+        </div>
+        <button
+          onClick={() => refetch()}
+          className="px-4 py-2 bg-sky-600 hover:bg-sky-500 text-white rounded text-xs font-medium transition cursor-pointer"
+        >
+          Tekrar Dene
+        </button>
+      </div>
+    );
+  }
 
   if (isLoading || !data) {
     return (

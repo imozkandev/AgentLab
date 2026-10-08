@@ -36,7 +36,13 @@ class AgentProvider(ABC):
         ...
 
     def run_sync(self, *a, **kw) -> AgentResult:
-        return asyncio.run(self.run(*a, **kw))
+        try:
+            asyncio.get_running_loop()
+            import concurrent.futures
+            with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
+                return pool.submit(lambda: asyncio.run(self.run(*a, **kw))).result()
+        except RuntimeError:
+            return asyncio.run(self.run(*a, **kw))
 
 
 class MockProvider(AgentProvider):
